@@ -41,7 +41,8 @@ glutLoop clientId address topic sensor callbacks =
       ]
     (exit, loop) <-
       producerLoop clientId address topic sensor
-        $ takeMVar nextEvent
+        $ (: [])
+        <$> takeMVar nextEvent
     return
       (
         exit
