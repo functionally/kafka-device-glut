@@ -1,7 +1,7 @@
 name:                kafka-device-glut
-version:             0.1.0.1
+version:             0.1.3.0
 synopsis:            GLUT events via a Kafka message broker
-description:         This package contains functions for passing GLUT events to topics on a Kafka message broker.
+description:         This package contains functions for passing GLUT events to topics on a Kafka message broker \<<https://kafka.apache.org/>\>.  Also see \<<https://hackage.haskell.org/package/kafka-device/>\>.
 license:             MIT
 license-file:        LICENSE
 author:              Brian W Bush <consult@brianwbush.info>
@@ -13,7 +13,7 @@ cabal-version:       >= 1.10
 stability:           Experimental
 homepage:            https://bitbucket.org/functionally/kafka-device-glut
 bug-reports:         https://bwbush.atlassian.net/projects/HKADEGL/issues/
-package-url:         https://bitbucket.org/functionally/kafka-device-glut/downloads/kafka-device-glut-0.1.0.0.tar.gz
+package-url:         https://bitbucket.org/functionally/kafka-device-glut/downloads/kafka-device-glut-0.1.3.0.tar.gz
 
 extra-source-files:  ReadMe.md
 

@@ -1,7 +1,20 @@
+{-|
+Module      :  Network.UI.Kafka.GLUT
+Copyright   :  (c) 2016 Brian W Bush
+License     :  MIT
+Maintainer  :  Brian W Bush <consult@brianwbush.info>
+Stability   :  Experimental
+Portability :  Stable
+
+Produce events on a Kafka topic from GLUT callbacks \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\>.
+-}
+
+
 {-# LANGUAGE RecordWildCards #-}
 
 
 module Network.UI.Kafka.GLUT (
+-- * Event handling.
   GlutCallback(..)
 , glutLoop
 ) where
@@ -17,16 +30,28 @@ import Network.UI.Kafka as K (ExitAction, LoopAction, Sensor, producerLoop)
 import Network.UI.Kafka.Types as K (Event(..), Modifiers(..), Button(..), SpecialKey(..))
 
 
+-- | Types of GLUT callbacks.  See \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\> for more details.
 data GlutCallback =
+    -- | Key presses and mouse button clicks.
     KeyboardMouse
+    -- | Mouse motion while a button is depressed.
   | Motion
+    -- | Mouse motion.
   | PassiveMotion
+    -- | Spaceball tracking and button clicks.
   | Spaceball
+    -- | Joystick tracking and button clicks.
   | Joystick
   deriving (Bounded, Enum, Eq, Ord, Read, Show)
 
 
-glutLoop :: KafkaClientId -> KafkaAddress -> TopicName -> Sensor -> [GlutCallback] -> IO (ExitAction, LoopAction)
+-- | Produce events for a Kafka topic from GLUT callbacks \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\>.
+glutLoop :: KafkaClientId               -- ^ A Kafka client identifier for the producer.
+         -> KafkaAddress                -- ^ The address of the Kakfa broker.
+         -> TopicName                   -- ^ The Kafka topic name.
+         -> Sensor                      -- ^ The name of the sensor producing events.
+         -> [GlutCallback]              -- ^ Which callbacks to enable.
+         -> IO (ExitAction, LoopAction) -- ^ Action to create the exit and loop actions.
 glutLoop clientId address topic sensor callbacks =
   do
     nextEvent <- newEmptyMVar
@@ -61,7 +86,12 @@ glutLoop clientId address topic sensor callbacks =
       )
 
 
-interpretKeyboardMouse :: Key -> KeyState -> G.Modifiers -> Position -> Event
+-- | Interpret key presses and mouse clickes.
+interpretKeyboardMouse :: Key         -- ^ The key.
+                       -> KeyState    -- ^ The state of the key.
+                       -> G.Modifiers -- ^ The modifier keys.
+                       -> Position    -- ^ The mouse position.
+                       -> Event       -- ^ The corresponding event.
 interpretKeyboardMouse key' state modifiers' position =
   let
     toggle        = Just $ translateKeyState  state
@@ -80,7 +110,9 @@ interpretKeyboardMouse key' state modifiers' position =
                                MouseEvent{..}
 
 
-interpretMotion :: Position -> Event
+-- | Interpret mouse motion.
+interpretMotion :: Position -- ^ The mouse position.
+                -> Event    -- ^ The corresponding event.
 interpretMotion position =
   let
     mousePosition = Just $ translatePosition position
@@ -88,7 +120,9 @@ interpretMotion position =
     PositionEvent{..}
 
 
-interpretSpaceball :: SpaceballInput -> Event
+-- | Interpret a spaceball event.
+interpretSpaceball :: SpaceballInput -- ^ The the spaceball input.
+                   -> Event          -- ^ The corresponding event.
 interpretSpaceball (SpaceballMotion rightward upward backward) =
   let
     motionRightward = fromIntegral rightward / 1000
@@ -110,7 +144,10 @@ interpretSpaceball (SpaceballButton button' state) =
     ButtonEvent{..}
 
 
-interpretJoystick :: JoystickButtons -> JoystickPosition -> Event
+-- | Interpret a joystick event.
+interpretJoystick :: JoystickButtons  -- ^ The state of joystick buttons.
+                  -> JoystickPosition -- ^ The joystick position.
+                  -> Event            -- ^ The corresponding event.
 interpretJoystick JoystickButtons{..} (JoystickPosition rightward forward upward) =
   let
     joystickRightward = fromIntegral rightward / 1000
@@ -127,12 +164,17 @@ interpretJoystick JoystickButtons{..} (JoystickPosition rightward forward upward
     JoystickEvent{..}
 
 
-translateKeyState :: Enum a => KeyState -> a
+-- | Translate the state of a key.
+translateKeyState :: Enum a
+                  => KeyState -- ^ The GLUT state.
+                  -> a        -- ^ The corresponding enumeration.
 translateKeyState G.Down = toEnum 0
 translateKeyState G.Up   = toEnum 1
 
 
-translateSpecialKey :: G.SpecialKey -> K.SpecialKey
+-- | Translate a special key.
+translateSpecialKey :: G.SpecialKey -- ^ The GLUT special key.
+                    -> K.SpecialKey -- ^ The corresponding special key.
 translateSpecialKey G.KeyF1          = K.KeyF1
 translateSpecialKey G.KeyF2          = K.KeyF2
 translateSpecialKey G.KeyF3          = K.KeyF3
@@ -166,7 +208,9 @@ translateSpecialKey G.KeyAltR        = K.KeyAltR
 translateSpecialKey (G.KeyUnknown x) = K.KeyUnknown x
 
 
-translateModifiers :: G.Modifiers -> K.Modifiers
+-- | Translate key modifiers.
+translateModifiers :: G.Modifiers -- ^ The GLUT key modifiers.
+                   -> K.Modifiers -- ^ The corresponding key modifiers.
 translateModifiers G.Modifiers{..} =
   let
     shiftModifier = not $ translateKeyState shift
@@ -176,11 +220,15 @@ translateModifiers G.Modifiers{..} =
     K.Modifiers{..}
 
 
-translatePosition :: Position -> (Double, Double)
+-- | Translate a position.
+translatePosition :: Position         -- ^ The position.
+                  -> (Double, Double) -- ^ The corresponding position.
 translatePosition (Position x y) = (fromIntegral x, fromIntegral y)
 
 
-translateMouseButton :: G.MouseButton -> K.Button
+-- | Translate a mouse button.
+translateMouseButton :: G.MouseButton -- ^ The GLUT button.
+                     -> K.Button      -- ^ The corresponding button.
 translateMouseButton G.LeftButton           = K.LeftButton 
 translateMouseButton G.MiddleButton         = K.MiddleButton 
 translateMouseButton G.RightButton          = K.RightButton 

@@ -1,4 +1,17 @@
+{-|
+Module      :  Main
+Copyright   :  (c) 2016 Brian W Bush
+License     :  MIT
+Maintainer  :  Brian W Bush <consult@brianwbush.info>
+Stability   :  Experimental
+Portability :  Stable
+
+Simple producer that transfers GLUT events \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\> on a Kafka topcis.
+-}
+
+
 module Main (
+-- * Main entry.
   main
 ) where
 
@@ -11,6 +24,7 @@ import Graphics.UI.GLUT (createWindow, displayCallback, getArgsAndInitialize, ma
 import Network.UI.Kafka.GLUT (glutLoop)
 
 
+-- | The main action.
 main :: IO ()
 main =
   do
