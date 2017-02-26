@@ -18,9 +18,9 @@ module Main (
 
 import Control.Concurrent (forkIO)
 import Control.Monad (void)
-import Data.String (IsString(fromString))
 import Graphics.Rendering.OpenGL (ClearBuffer(..), ($=!), clear)
 import Graphics.UI.GLUT (createWindow, displayCallback, getArgsAndInitialize, mainLoop, swapBuffers)
+import Network.UI.Kafka (TopicConnection(TopicConnection))
 import Network.UI.Kafka.GLUT (glutLoop)
 
 
@@ -42,9 +42,7 @@ main =
           void $ createWindow "GLUT Events for Kafka"
           (_, loop) <-
             glutLoop
-              (fromString client)
-              (fromString host, toEnum $ read port)
-              (fromString topic)
+              (TopicConnection client (host, read port) topic)
               sensor
               callbacks
           void . forkIO $ void loop

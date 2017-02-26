@@ -24,9 +24,7 @@ import Control.Concurrent.MVar (newEmptyMVar, putMVar, takeMVar)
 import Control.Monad (when)
 import Graphics.Rendering.OpenGL (($=!))
 import Graphics.UI.GLUT as G (Key(..), KeyState(..), JoystickButtons(..), JoystickPosition(..), Modifiers(..), MouseButton(..), Position(..), SpaceballInput(..), SpecialKey(..), joystickCallback, keyboardMouseCallback, motionCallback, passiveMotionCallback, spaceballCallback)
-import Network.Kafka (KafkaAddress, KafkaClientId)
-import Network.Kafka.Protocol (TopicName)
-import Network.UI.Kafka as K (ExitAction, LoopAction, Sensor, producerLoop)
+import Network.UI.Kafka as K (ExitAction, LoopAction, Sensor, TopicConnection, producerLoop)
 import Network.UI.Kafka.Types as K (Event(..), Modifiers(..), Button(..), SpecialKey(..))
 
 
@@ -46,13 +44,11 @@ data GlutCallback =
 
 
 -- | Produce events for a Kafka topic from GLUT callbacks \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\>.
-glutLoop :: KafkaClientId               -- ^ A Kafka client identifier for the producer.
-         -> KafkaAddress                -- ^ The address of the Kakfa broker.
-         -> TopicName                   -- ^ The Kafka topic name.
+glutLoop :: TopicConnection             -- ^ The Kafka topic name and connection information.
          -> Sensor                      -- ^ The name of the sensor producing events.
          -> [GlutCallback]              -- ^ Which callbacks to enable.
          -> IO (ExitAction, LoopAction) -- ^ Action to create the exit and loop actions.
-glutLoop clientId address topic sensor callbacks =
+glutLoop topicConnection sensor callbacks =
   do
     nextEvent <- newEmptyMVar
     mapM_
@@ -65,7 +61,7 @@ glutLoop clientId address topic sensor callbacks =
       , (Joystick     , joystickCallback      $=! Just (  (putMVar nextEvent .)       . interpretJoystick     , 0))
       ]
     (exit, loop) <-
-      producerLoop clientId address topic sensor
+      producerLoop topicConnection sensor
         $ (: [])
         <$> takeMVar nextEvent
     return
