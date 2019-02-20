@@ -1,5 +1,5 @@
 {-|
-Module      :  $Headers
+Module      :  $Header$
 Copyright   :  (c) 2016-19 Brian W Bush
 License     :  MIT
 Maintainer  :  Brian W Bush <code@functionally.io>
