@@ -24,10 +24,10 @@ source-repository head
  
 library
   exposed-modules : Network.UI.Kafka.GLUT
-  build-depends   : base >= 4.8 && < 5
-                  , GLUT
-                  , kafka-device
-                  , OpenGL
+  build-depends   : base         >= 4.8 && < 5
+                  , GLUT         >= 2.7.0
+                  , kafka-device >= 1.0.0
+                  , OpenGL       >= 3.0.2
   hs-source-dirs  : src
   ghc-options     : -Wall
   default-language: Haskell2010
@@ -35,10 +35,10 @@ library
 executable kafka-device-glut
   main-is         : Main.hs
   other-modules   : Network.UI.Kafka.GLUT
-  build-depends   : base
-                  , GLUT
-                  , kafka-device
-                  , OpenGL
+  build-depends   : base         >= 4.8 && < 5
+                  , GLUT         >= 2.7.0
+                  , kafka-device >= 1.0.0
+                  , OpenGL       >= 3.0.2
   hs-source-dirs  : src
   ghc-options     : -Wall -threaded
   default-language: Haskell2010
