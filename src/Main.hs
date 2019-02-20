@@ -1,10 +1,10 @@
 {-|
-Module      :  Main
-Copyright   :  (c) 2016 Brian W Bush
+Module      :  $Headers
+Copyright   :  (c) 2016-19 Brian W Bush
 License     :  MIT
-Maintainer  :  Brian W Bush <consult@brianwbush.info>
-Stability   :  Experimental
-Portability :  Stable
+Maintainer  :  Brian W Bush <code@functionally.io>
+Stability   :  Production
+Portability :  Portable
 
 Simple producer that transfers GLUT events \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\> on a Kafka topcis.
 -}
