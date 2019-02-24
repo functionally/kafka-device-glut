@@ -18,6 +18,13 @@ module Network.UI.Kafka.GLUT (
 -- * Event handling.
   GlutCallback(..)
 , glutLoop
+-- * Internal.
+, interpretKeyboardMouse
+, interpretMotion
+, interpretSpaceball
+, interpretJoystick
+, setCallbacks
+, clearCallbacks
 ) where
 
 
@@ -52,15 +59,7 @@ glutLoop :: TopicConnection             -- ^ The Kafka topic name and connection
 glutLoop topicConnection sensor callbacks =
   do
     nextEvent <- newEmptyMVar
-    mapM_
-      (uncurry (when . (`elem` callbacks)))
-      [
-        (KeyboardMouse, keyboardMouseCallback $=! Just ((((putMVar nextEvent .) .) .) . interpretKeyboardMouse   ))
-      , (Motion       , motionCallback        $=! Just (   putMVar nextEvent          . interpretMotion          ))
-      , (PassiveMotion, passiveMotionCallback $=! Just (   putMVar nextEvent          . interpretMotion          ))
-      , (Spaceball    , spaceballCallback     $=! Just (   putMVar nextEvent          . interpretSpaceball       ))
-      , (Joystick     , joystickCallback      $=! Just (  (putMVar nextEvent .)       . interpretJoystick     , 0))
-      ]
+    setCallbacks callbacks $ putMVar nextEvent
     (exit, loop) <-
       producerLoop topicConnection sensor
         $ (: [])
@@ -70,17 +69,40 @@ glutLoop topicConnection sensor callbacks =
         exit
       , do
           result <- loop
-          mapM_
-            (uncurry (when . (`elem` callbacks)))
-            [
-              (KeyboardMouse, keyboardMouseCallback $=! Nothing)
-            , (Motion       , motionCallback        $=! Nothing)
-            , (PassiveMotion, passiveMotionCallback $=! Nothing)
-            , (Spaceball    , spaceballCallback     $=! Nothing)
-            , (Joystick     , joystickCallback      $=! Nothing)
-            ]
+          clearCallbacks callbacks
           return result
       )
+
+
+-- | Set a callback from GLUT callbacks \<<https://hackage.haskell.org/package/GLUT-2.7.0.10/docs/Graphics-UI-GLUT-Callbacks-Window.html>\>.
+setCallbacks :: [GlutCallback]   -- ^ Which callbacks to enable.
+             -> (Event -> IO ()) -- ^ The action for handling GLUT events.
+             -> IO ()            -- ^ Action to create the GLUT callbacks for the channel.
+setCallbacks callbacks action =
+  mapM_
+    (uncurry (when . (`elem` callbacks)))
+    [
+      (KeyboardMouse, keyboardMouseCallback $=! Just ((((action .) .) .) . interpretKeyboardMouse   ))
+    , (Motion       , motionCallback        $=! Just (   action          . interpretMotion          ))
+    , (PassiveMotion, passiveMotionCallback $=! Just (   action          . interpretMotion          ))
+    , (Spaceball    , spaceballCallback     $=! Just (   action          . interpretSpaceball       ))
+    , (Joystick     , joystickCallback      $=! Just (  (action .)       . interpretJoystick     , 0))
+    ]
+
+
+-- | Clear callbacks for the specified event types.
+clearCallbacks :: [GlutCallback] -- ^ Which callbacks to enable.
+               -> IO ()          -- ^ Action to create the GLUT callbacks for the channel.
+clearCallbacks callbacks =
+  mapM_
+    (uncurry (when . (`elem` callbacks)))
+    [
+      (KeyboardMouse, keyboardMouseCallback $=! Nothing)
+    , (Motion       , motionCallback        $=! Nothing)
+    , (PassiveMotion, passiveMotionCallback $=! Nothing)
+    , (Spaceball    , spaceballCallback     $=! Nothing)
+    , (Joystick     , joystickCallback      $=! Nothing)
+    ]
 
 
 -- | Interpret key presses and mouse clickes.

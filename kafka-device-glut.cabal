@@ -1,5 +1,5 @@
 name         : kafka-device-glut
-version      : 1.0.0.0
+version      : 1.0.1.0
 synopsis     : GLUT events via a Kafka message broker
 description  : This package contains functions for passing GLUT events to topics on a Kafka message broker \<<https://kafka.apache.org/>\>.  Also see \<<https://hackage.haskell.org/package/kafka-device/>\>.
 license      : MIT
